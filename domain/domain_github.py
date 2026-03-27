@@ -17,8 +17,8 @@ REQUIRES = ("github_access_token",)
 
 def github_search(query):
     github_access_token = get_config_value('github_access_token')
-    endpoint_git = "https://api.github.com/search/code?q=\"%s\"&access_token=%s" % (query, github_access_token)
-    req = requests.get(endpoint_git)
+    endpoint_git = "https://api.github.com/search/code?q=\"%s\"" % query
+    req = requests.get(endpoint_git, headers={"Authorization": f"token {github_access_token}"})
     data = req.json()
     return data.get('total_count'), data.get('items')
 

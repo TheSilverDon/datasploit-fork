@@ -39,7 +39,7 @@ def run_active(filename, entity):
                     if req.status_code == 404 or req.status_code == 403:
                         might_be_vuln.append(["http", x, recrd, req.status_code])
                     hosts_with_http_or_https.append("http://%s" % x)
-                except:
+                except requests.RequestException:
                     pass
                 try:
                     req = requests.get("https://" + str(x), timeout=5)
@@ -48,7 +48,7 @@ def run_active(filename, entity):
                     if req.status_code == 404 or req.status_code == 403:
                         might_be_vuln.append(["http", x])
                     hosts_with_http_or_https.append("https://%s" % x)
-                except:
+                except requests.RequestException:
                     pass
             else:
                 counter = counter + 1

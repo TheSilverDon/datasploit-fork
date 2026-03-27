@@ -20,7 +20,7 @@ def main(ip):
     obj = IPWhois(ip)
     try:
         results = obj.lookup_rdap(depth=1)
-    except:
+    except Exception:
         results = None
     return results
 

@@ -19,11 +19,11 @@ class CollectorRegistry:
         _ensure_project_root_on_path()
         self._collectors: Dict[TargetType, List[CollectorModule]] = {}
         categories = list(categories) if categories else list(TargetType)
-        colelctor_count = 0
+        collector_count = 0
         for category in categories:
             self._collectors[category] = self._discover_for_category(category)
-            colelctor_count += len(self._collectors[category])
-        print(colored(f"[+] Discovered {colelctor_count} collectors across {len(categories)} categories.", "green"))
+            collector_count += len(self._collectors[category])
+        print(colored(f"[+] Discovered {collector_count} collectors across {len(categories)} categories.", "green"))
 
     def _discover_for_category(self, category: TargetType) -> List[CollectorModule]:
         collectors: List[CollectorModule] = []

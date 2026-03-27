@@ -10,11 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from termcolor import colored
-import time
-import warnings
 import json
-
-warnings.filterwarnings("ignore")
 
 ENABLED = True
 WRITE_TEXT_FILE = True
@@ -37,7 +33,7 @@ def check_and_append_other_domains(other_domain, other_related_domain_list):
 
 def subdomains(domain, subdomain_list):
     print(colored(' [+] Extracting subdomains from DNS Dumpster\n', 'blue'))
-    r = requests.get("https://dnsdumpster.com/", verify=False)
+    r = requests.get("https://dnsdumpster.com/")
     cookies = {}
     if 'csrftoken' in r.cookies:
         cookies['csrftoken'] = r.cookies['csrftoken']
@@ -46,7 +42,7 @@ def subdomains(domain, subdomain_list):
         data['targetip'] = domain
         headers = {}
         headers['Referer'] = "https://dnsdumpster.com/"
-        req = requests.post("https://dnsdumpster.com/", data=data, cookies=cookies, headers=headers, verify=False)
+        req = requests.post("https://dnsdumpster.com/", data=data, cookies=cookies, headers=headers)
         soup = BeautifulSoup(req.text, 'lxml')
         subdomains_new = soup.findAll('td', {"class": "col-md-4"})
         for subd in subdomains_new:
@@ -149,54 +145,7 @@ def ct_search(domain, subdomain_list, wildcard=True):
         except IndexError:
             print("Error retrieving information.")
 
-    return subdomain_list_tmp
-
-'''def find_domains_from_next_page_ct(page_identifier, domain, subdomain_list, other_related_domain_list):
-    url = "https://transparencyreport.google.com/transparencyreport/api/v3/httpsreport/ct/certsearch/page?p=%s" % page_identifier
-    req2 = requests.get(url)
-    obj2 = req2.text
-    new_obj2= obj2.replace(")]}'\n\n", '')
-    dd2 = json.loads(new_obj2)
-    details2 = dd2[0][1]
-    for x in details2:
-        if "*" in x[1]:
-            x[1] = x[1].replace("*.", "")
-        if x[1].endswith(domain):
-            subdomain_list = check_and_append_subdomains(x[1], subdomain_list)
-        else:
-            other_related_domain_list = check_and_append_other_domains(x[1], other_related_domain_list)
-    try:
-        nextpage_details = dd2[0][3]
-        if nextpage_details[3] != nextpage_details[4]:
-            page_identifier = nextpage_details[1]
-            find_domains_from_next_page_ct(page_identifier, domain, subdomain_list, other_related_domain_list)
-    except:
-        pass
-
-def subdomains_from_google_ct(domain, subdomain_list, other_related_domain_list):
-    print(colored(' [+] Extracting subdomains from Certificate Transparency Reports\n', 'blue'))
-    url = 'https://transparencyreport.google.com/transparencyreport/api/v3/httpsreport/ct/certsearch?include_expired=true&include_subdomains=true&domain=%s' % (domain)
-    req = requests.get(url)
-    obj = req.text
-    new_obj= obj.replace(")]}'\n\n", '')
-    dd = json.loads(new_obj)
-    details = dd[0][1]
-    for x in details:
-        if "*" in x[1]:
-            x[1] = x[1].replace("*.", "")
-        if x[1].endswith(domain):
-            subdomain_list = check_and_append_subdomains(x[1], subdomain_list)
-        else:
-            other_related_domain_list = check_and_append_other_domains(x[1], other_related_domain_list)
-
-    try:
-        nextpage_details = dd[0][3]
-        if nextpage_details[3] != nextpage_details[4]:
-            page_identifier = nextpage_details[1]
-            find_domains_from_next_page_ct(page_identifier, domain, subdomain_list, other_related_domain_list)
-    except:
-        pass
-    return subdomain_list, other_related_domain_list'''
+    return subdomain_list
 
 def subdomains_from_dnstrails(domain, subdomain_list):
     print(colored(' [+] Extracting subdomains from DNSTrails\n', 'blue'))
@@ -226,15 +175,11 @@ def banner():
     return f"Running {MODULE_NAME}"
 
 def main(domain):
-    time.sleep(0.3)
     subdomain_list = []
-    other_related_domain_list = []
     subdomain_list = subdomains(domain, subdomain_list)
     subdomain_list = subdomains_from_netcraft(domain, subdomain_list)
-    #subdomain_list, other_related_domain_list = subdomains_from_google_ct(domain, subdomain_list, other_related_domain_list)
-    subdomains_from_ct = ct_search(domain, subdomain_list)
+    subdomain_list = ct_search(domain, subdomain_list)
     subdomain_list = subdomains_from_dnstrails(domain, subdomain_list)
-    # not printing list of 'other_related_domain_list' anywhere. This is done for later changes.
     return subdomain_list
 
 def output(data, domain=""):

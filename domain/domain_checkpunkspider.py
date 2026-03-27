@@ -9,7 +9,6 @@ import requests
 import sys
 import warnings
 from termcolor import colored
-import time
 
 ENABLED = True
 MODULE_NAME = "Domain Punkspider"
@@ -18,8 +17,7 @@ REQUIRES = ()
 warnings.filterwarnings("ignore")
 
 def checkpunkspider(reversed_domain):
-    time.sleep(0.5)
-    req = requests.post("http://www.punkspider.org/service/search/detail/" + reversed_domain, verify=False)
+    req = requests.post("http://www.punkspider.org/service/search/detail/" + reversed_domain)
     try:
         return req.json()
     except ValueError:
