@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from . import username, emails, domain, ip, datasploit, core
-
 __all__ = ["username", "emails", "domain", "ip", "datasploit", "core"]
 __title__ = 'datasploit'
 __version__ = '1.0'

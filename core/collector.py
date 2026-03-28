@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +11,11 @@ from types import ModuleType
 from termcolor import colored
 
 from .config import get_config_value
+from .result import ModuleResult, ResultStatus
 from .style import style
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CollectorModule:
@@ -66,17 +72,50 @@ class CollectorModule:
         if callable(banner_fn):
             print(colored(f'{style.BOLD}[>] {banner_fn()}{style.END}', 'blue'))
 
-    def run(self, target: str) -> Optional[object]:
+    def run(self, target: str) -> ModuleResult:
         main_fn = getattr(self.module, "main", None)
         output_fn = getattr(self.module, "output", None)
         if not callable(main_fn) or not callable(output_fn):
-            print(colored(f"[-] Collector {self.name} is missing main/output functions. Skipping.", "red"))
-            return None
+            logger.warning("Collector %s is missing main/output functions. Skipping.", self.name)
+            return ModuleResult(
+                module_key=self.key, module_name=self.name, category=self.category,
+                target=target, status=ResultStatus.ERROR,
+                error_msg="Missing main() or output() function",
+            )
 
-        data = main_fn(target)
-        if data is not None:
+        start = time.monotonic()
+        try:
+            data = main_fn(target)
+        except Exception as exc:
+            duration = time.monotonic() - start
+            logger.debug("Collector %s raised an exception: %s", self.name, exc, exc_info=True)
+            return ModuleResult(
+                module_key=self.key, module_name=self.name, category=self.category,
+                target=target, status=ResultStatus.ERROR,
+                error_msg=str(exc), duration_s=duration,
+            )
+
+        duration = time.monotonic() - start
+
+        # Normalise legacy [False, "INVALID_API"] / [False, <msg>] sentinel
+        if isinstance(data, list) and len(data) == 2 and data[0] is False:
+            return ModuleResult(
+                module_key=self.key, module_name=self.name, category=self.category,
+                target=target, status=ResultStatus.API_ERROR,
+                error_msg=str(data[1]), duration_s=duration,
+            )
+
+        status = ResultStatus.NO_RESULT if not data else ResultStatus.SUCCESS
+
+        try:
             output_fn(data, target)
-        return data
+        except Exception as exc:
+            logger.debug("Collector %s output() raised: %s", self.name, exc)
+
+        return ModuleResult(
+            module_key=self.key, module_name=self.name, category=self.category,
+            target=target, status=status, data=data, duration_s=duration,
+        )
 
     def write_text_report(self, target: str, data: object, output_dir: Path | None = None) -> None:
         if not self.writes_text:

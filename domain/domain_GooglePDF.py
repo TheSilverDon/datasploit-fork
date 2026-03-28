@@ -13,6 +13,7 @@ from termcolor import colored
 ENABLED = False
 MODULE_NAME = "Domain Google PDF Search"
 REQUIRES = ()
+DESCRIPTION = "Disabled: Superseded by the Google Custom Search (domain_pastes) module."
 
 def googlesearch(query, ext):
     google = "https://www.google.co.in/search?filter=0&q=site:"

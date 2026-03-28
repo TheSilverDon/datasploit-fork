@@ -1,5 +1,28 @@
+"""DEPRECATED: use the Domain Active Scan collector instead.
+
+Run DataSploit normally and the ``domain_activescan`` collector will be
+discovered automatically::
+
+    python datasploit.py -i example.com
+
+This standalone script is kept for backward compatibility only and will
+be removed in a future release.
+"""
+
+import sys
+import warnings
+warnings.warn(
+    "active_scan.py is deprecated. Use 'python datasploit.py -i <domain>' "
+    "which includes the Domain Active Scan collector automatically.",
+    DeprecationWarning,
+    stacklevel=1,
+)
+
 import optparse
-from domain_dnsrecords import fetch_dns_records, parse_dns_records
+try:
+    from domain.domain_dnsrecords import fetch_dns_records, parse_dns_records
+except ImportError:
+    from domain_dnsrecords import fetch_dns_records, parse_dns_records
 import requests
 from termcolor import colored
 

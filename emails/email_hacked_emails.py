@@ -19,6 +19,7 @@ from termcolor import colored
 ENABLED = False
 MODULE_NAME = "Email Hacked Emails"
 REQUIRES = ()
+DESCRIPTION = "Disabled: Source endpoint no longer publicly available."
 
 def banner():
     return f"Running {MODULE_NAME}"
