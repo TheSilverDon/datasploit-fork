@@ -7,7 +7,6 @@ except ImportError:  # pragma: no cover - legacy script execution
 
 from Wappalyzer import Wappalyzer, WebPage
 import sys
-import time
 from termcolor import colored
 
 ENABLED = True
@@ -16,7 +15,6 @@ REQUIRES = ()
 
 def wappalyzeit(domain):
     temp_list = []
-    time.sleep(0.3)
     wappalyzer = Wappalyzer.latest()
     webpage = WebPage.new_from_url(domain)
     set1 = wappalyzer.analyze(webpage)
@@ -37,12 +35,12 @@ def main(domain):
     try:
         targeturl = "http://" + domain
         data["HTTP"] = wappalyzeit(targeturl)
-    except:
+    except Exception:
         print("[-] HTTP connection was unavailable")
     try:
         targeturl = "https://" + domain
         data["HTTPS"] = wappalyzeit(targeturl)
-    except:
+    except Exception:
         print("[-] HTTPS connection was unavailable")
     return data
 

@@ -64,18 +64,14 @@ def view(server, temp_dict):
                        auth=(censysio_id, censysio_secret))
     payload = res.json()
 
-    try:
-        if 'title' in payload['80']['http']['get']:
-            # print("[+] Title: %s" % payload['80']['http']['get']['title'])
-            title = payload['80']['http']['get']['title']
-            temp_dict['title'] = title
-        if 'server' in payload['80']['http']['get']['headers']:
-            header = "[+] Server: %s" % payload['80']['http']['get']['headers']['server']
-            temp_dict["server_header"] = payload['80']['http']['get']['headers']['server']
-        return temp_dict
-
-    except Exception as error:
-        print(error)
+    http_get = payload.get('80', {}).get('http', {}).get('get', {})
+    title = http_get.get('title')
+    if title:
+        temp_dict['title'] = title
+    server = http_get.get('headers', {}).get('server')
+    if server:
+        temp_dict['server_header'] = server
+    return temp_dict
 
 def output(data, domain=""):
     if data is not None:

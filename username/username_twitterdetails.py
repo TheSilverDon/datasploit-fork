@@ -10,6 +10,7 @@ except ImportError:  # pragma: no cover - legacy script execution
 import os
 import re
 import sys
+import tempfile
 import tweepy
 import requests
 from collections import Counter
@@ -68,15 +69,16 @@ def twitterdetails(username):
     userdetails['UTC Offset'] = userinfo.utc_offset
     userdetails['Verified Account'] = userinfo.verified
 
-    with open("temptweets.txt", "w", encoding='utf-8') as f:
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', encoding='utf-8', delete=False) as f:
+        tmp_path = f.name
         for tweet in tweepy.Cursor(api.user_timeline, id=username).items(1000):
             f.write(tweet.text + "\n")
 
-    with open('temptweets.txt', 'r', encoding='utf-8') as f:
+    with open(tmp_path, 'r', encoding='utf-8') as f:
         q = f.read()
     strings = re.findall(r'(?:\#+[\w_]+[\w\'_\-]*[\w_]+)', q)
     tusers = re.findall(r'(?:@[\w_]+)', q)
-    os.remove("temptweets.txt")
+    os.remove(tmp_path)
 
     hashlist = [item.strip('#').lower() for item in strings]
     userlist = [itm.strip('@').lower() for itm in tusers]

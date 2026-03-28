@@ -20,7 +20,8 @@ def fetch_dns_records(domain, rec_type):
         for rdata in answers:
             rec_list.append(str(rdata))
         return rec_list
-    except:
+    except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers,
+            dns.exception.DNSException):
         return colored("No Records Found", 'red')
 
 def parse_dns_records(domain):
@@ -50,7 +51,7 @@ def output(data, domain=""):
             for y in data[x]:
                 try:
                     print("\t%s" % y)
-                except:
+                except (UnicodeEncodeError, UnicodeDecodeError):
                     pass
     print("\n-----------------------------\n")
 

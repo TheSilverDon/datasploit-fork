@@ -9,6 +9,7 @@ import os
 import sys
 import requests
 import urllib.request, urllib.parse, urllib.error
+from pathlib import Path
 from bs4 import BeautifulSoup
 from . import username_usernamesearch
 from termcolor import colored
@@ -33,9 +34,12 @@ def extracting(imglinks, username, prourl, tag, attribute, value, finattrib, pro
         img_url = "http:" + img_url
 
     imglinks.append(img_url)
-    path = os.path.join("profile_pic", username, profile + ".jpg")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    urllib.request.urlretrieve(img_url, path)
+    base = Path("profile_pic").resolve()
+    path = (base / username / (profile + ".jpg")).resolve()
+    if not str(path).startswith(str(base)):
+        return imglinks
+    path.parent.mkdir(parents=True, exist_ok=True)
+    urllib.request.urlretrieve(img_url, str(path))
     return imglinks
 
 def profilepic(urls, username):
@@ -149,17 +153,6 @@ def profilepic(urls, username):
                 val = 'avatar'
                 valx = 'src'
                 pro = "last.fm"
-                imagelinks = extracting(imagelinks, username, url, tg, att, val, valx, pro)
-                continue
-            except KeyError:
-                pass
-        elif 'vimeo' in url:
-            try:
-                tg = 'meta'
-                att = 'property'
-                val = 'og:image'
-                valx = 'content'
-                pro = "vimeo"
                 imagelinks = extracting(imagelinks, username, url, tg, att, val, valx, pro)
                 continue
             except KeyError:

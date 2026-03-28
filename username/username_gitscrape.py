@@ -25,8 +25,8 @@ def banner():
 def find_repos(username):
     access_token = get_config_value('github_access_token')
     list_repos = []
-    url = "https://api.github.com/users/%s/repos?access_token=%s" % (username, access_token)
-    req = requests.get(url)
+    url = "https://api.github.com/users/%s/repos" % username
+    req = requests.get(url, headers={"Authorization": f"token {access_token}"})
     if 'API rate limit exceeded' not in req.text:
         data = req.json()
         if "message" in data and data['message'] == "Not Found":
@@ -42,13 +42,13 @@ def find_commits(repo_name):
     list_commits = []
     access_token = get_config_value('github_access_token')
     for x in range(1, 10):
-        url = "https://api.github.com/repos/%s/commits?page=%s&access_token=%s" % (repo_name, x, access_token)
-        req = requests.get(url)
+        url = "https://api.github.com/repos/%s/commits?page=%s" % (repo_name, x)
+        req = requests.get(url, headers={"Authorization": f"token {access_token}"})
         data = req.json()
         for commits in data:
             try:
                 list_commits.append(commits['sha'])
-            except:
+            except (KeyError, TypeError):
                 pass
         if len(data) < 30:
             return list_commits

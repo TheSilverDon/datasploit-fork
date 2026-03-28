@@ -18,6 +18,7 @@ from termcolor import colored
 ENABLED = False
 MODULE_NAME = "Domain Urlscan.io"
 REQUIRES = ("urlscanio_api",)
+DESCRIPTION = "Disabled: URLScan.io API v2 requires authentication; re-enable once urlscanio_api key is configured."
 
 # Set alternative UserAgent, if desired, here.
 custom_agent = 'DataSploit - (https://github.com/DataSploit/datasploit)'

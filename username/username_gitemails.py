@@ -30,7 +30,8 @@ def banner():
     return f"Running {MODULE_NAME}"
 
 def __get_username_repos(username):
-    r = requests.get("%s/users/%s/repos?access_token=%s" % (GITHUB_BASE, username, access_token))
+    r = requests.get("%s/users/%s/repos" % (GITHUB_BASE, username),
+                     headers={"Authorization": f"token {access_token}"})
     repos = []
     response = r.json()
     if "message" in response:
@@ -41,7 +42,8 @@ def __get_username_repos(username):
     return repos
 
 def __get_email_from_repo(repo, username):
-    r = requests.get("%s/repos/%s/commits?access_token=%s" % (GITHUB_BASE, repo, access_token))
+    r = requests.get("%s/repos/%s/commits" % (GITHUB_BASE, repo),
+                     headers={"Authorization": f"token {access_token}"})
     response = r.json()
     emails = []
     if isinstance(response, list):

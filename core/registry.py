@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import logging
 import pkgutil
 import sys
 from pathlib import Path
@@ -11,6 +12,8 @@ from termcolor import colored
 from .collector import CollectorModule
 from .types import CATEGORY_PACKAGES, PREFIX_BY_CATEGORY, TargetType
 
+logger = logging.getLogger(__name__)
+
 
 class CollectorRegistry:
     """Discover and cache collector modules across all categories."""
@@ -19,11 +22,12 @@ class CollectorRegistry:
         _ensure_project_root_on_path()
         self._collectors: Dict[TargetType, List[CollectorModule]] = {}
         categories = list(categories) if categories else list(TargetType)
-        colelctor_count = 0
+        collector_count = 0
         for category in categories:
             self._collectors[category] = self._discover_for_category(category)
-            colelctor_count += len(self._collectors[category])
-        print(colored(f"[+] Discovered {colelctor_count} collectors across {len(categories)} categories.", "green"))
+            collector_count += len(self._collectors[category])
+        logger.info("Discovered %d collectors across %d categories.", collector_count, len(categories))
+        print(colored(f"[+] Discovered {collector_count} collectors across {len(categories)} categories.", "green"))
 
     def _discover_for_category(self, category: TargetType) -> List[CollectorModule]:
         collectors: List[CollectorModule] = []
@@ -33,6 +37,7 @@ class CollectorRegistry:
         try:
             package = importlib.import_module(package_name)
         except ModuleNotFoundError:
+            logger.error("Could not import package '%s' for category '%s'.", package_name, category.value)
             print(colored(f"[-] Could not import package '{package_name}' for category '{category.value}'.", "red"))
             return collectors
 
@@ -46,6 +51,7 @@ class CollectorRegistry:
             try:
                 collector = CollectorModule.from_module(module_name, category.value, module)
             except Exception as exc:
+                logger.warning("Skipping %s.%s: %s", package_name, module_name, exc)
                 print(colored(f"[-] Skipping {package_name}.{module_name}: {exc}", "yellow"))
                 continue
             collectors.append(collector)
@@ -64,6 +70,7 @@ def import_module_from_package(package: str, module_name: str):
     try:
         return importlib.import_module(f"{package}.{module_name}")
     except Exception as exc:
+        logger.warning("Failed to import module %s.%s: %s", package, module_name, exc)
         print(colored(f"[-] Failed to import module {package}.{module_name}: {exc}", "red"))
         return None
 

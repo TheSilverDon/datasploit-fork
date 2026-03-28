@@ -9,8 +9,6 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 from termcolor import colored
-from urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Control whether the module is enabled or not
 ENABLED = True
@@ -22,7 +20,7 @@ def banner():
 
 def main(username):
     data = {"username": username}
-    req = requests.post('https://usersearch.org/results_normal.php', data=data, verify=False)
+    req = requests.post('https://usersearch.org/results_normal.php', data=data)
     soup = BeautifulSoup(req.text, "html.parser")
     atag = soup.findAll('a', {'class': 'pretty-button results-button'})
     profiles = []

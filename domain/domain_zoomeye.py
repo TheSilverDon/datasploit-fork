@@ -15,6 +15,7 @@ import time
 ENABLED = False
 MODULE_NAME = "Domain Zoomeye"
 REQUIRES = ("zoomeyeuser", "zoomeyepass")
+DESCRIPTION = "Disabled: ZoomEye API v2 authentication changed; module needs updating to new endpoint."
 
 def get_accesstoken_zoomeye():
     username = get_config_value('zoomeyeuser')

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from configobj import ConfigObj
 from functools import lru_cache
 from pathlib import Path
@@ -30,5 +31,20 @@ def load_config() -> Dict[str, str]:
 
 
 def get_config_value(key: str) -> str | None:
-    """Fetch a value from the cached configuration, if available."""
+    """Fetch a configuration value.
+
+    Lookup order:
+    1. Environment variable ``DATASPLOIT_<KEY>`` (upper-cased key)
+    2. config.ini / config.py on disk
+
+    This allows API keys to be injected via the environment in CI/CD pipelines
+    and container deployments without modifying config files.
+
+    Example::
+
+        DATASPLOIT_SHODAN_API=mykey python datasploit.py -i 1.2.3.4
+    """
+    env_val = os.environ.get(f"DATASPLOIT_{key.upper()}")
+    if env_val:
+        return env_val
     return load_config().get(key)
